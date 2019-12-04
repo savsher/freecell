@@ -4,21 +4,21 @@
 import os
 import numpy as np
 
-Home = {'hearts': [], 'spades': [], 'diamonds': [], 'clubs': []}
-Desk = 
+Suit = ('h', 's', 'd', 'c')
+Home = dict()
+Desk = ([], [], [], [], [], [], [], [])
+Buffer = []
 
 
-
-
-class Desk():
-    pass
+def initial_deal():
+    for s in Suit:
+        Home[s] = [(s, i) for i in range(1, 14)]
 
 
 
 def main():
     # todo: home
-
-    print('ok')
+    print(Desk)
 
 if __name__ == '__main__':
     main()
