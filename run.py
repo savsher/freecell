@@ -4,8 +4,21 @@
 import os
 import numpy as np
 
-def main():
+Home = {'hearts': [], 'spades': [], 'diamonds': [], 'clubs': []}
+Desk = 
+
+
+
+
+class Desk():
     pass
 
-if __file__ == '__main__':
+
+
+def main():
+    # todo: home
+
+    print('ok')
+
+if __name__ == '__main__':
     main()
