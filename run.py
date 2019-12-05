@@ -2,7 +2,6 @@
 # (C) savsher@yandex.ru 20191203
 
 import os
-import numpy as np
 import sys
 
 mn = 13
@@ -21,6 +20,7 @@ Buffer = []
 Path = []
 Score = 0
 
+
 def game_over():
     if len(Home[0]) == mn:
         if len(Home[1] == mn):
@@ -29,8 +29,6 @@ def game_over():
                     print('Score: {}'.format(Score))
                     print('Path: {}'.format(Path))
                     sys.exit(0)
-
-
 
 
 def initial_deal(random_desk=True):
@@ -62,10 +60,6 @@ def main():
                 game_over()
                 continue
         # todo: ? Buffer in Desk
-
-
-
-
 
 
 if __name__ == '__main__':
