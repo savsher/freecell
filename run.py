@@ -7,7 +7,6 @@ import sys
 mn = 13
 Score = 0
 
-Suit = ('h', 's', 'd', 'c')
 Home = ([], [], [], [])
 Desk = ([44, 43, 14, 47, 26, 52, 13],
         [3, 49, 36, 51, 19, 10, 11],
@@ -21,11 +20,14 @@ Buffer = [0, 0, 0, 0]
 Path = []
 NoPath = []
 
-def cur_cards():
-    """ cards that can move """
+
+def get_played_cards():
+    """
+    [ 1,2,3,4,5,6,7,8, 1,2,3,4, 1,2,3,4 ]
+            Desk        Buffer    Home
+    """
     x = []
-    for card in Buffer:
-        x.append(card)
+
     for col in Desk:
         try:
             card = col[-1]
@@ -33,6 +35,8 @@ def cur_cards():
             card = 0
         finally:
             x.append(card)
+    for card in Buffer:
+        x.append(card)
     for col in Home:
         try:
             card = col[-1]
@@ -44,36 +48,34 @@ def cur_cards():
     return x
 
 
-def game_over():
-    """ Check end of the game """
-    if len(Home[0]) == mn:
-        if len(Home[1] == mn):
-            if len(Home[2] == mn):
-                if len(Home[3]) == mn:
-                    print('Score: {}'.format(Score))
-                    print('Path: {}'.format(Path))
-                    sys.exit(0)
-
-
-def fit_home(card, cur_cards):
+def fit_home(card, home_cards):
+    """ Try to put card from Buffer or Desk to Home """
     suit = (card-1)//mn
-    if cur_cards[suit+12] == 0:
+    if home_cards[suit] == 0:
         # Ace
         if card == (suit * mn + 1):
-            idx = cur_cards.index(card)
-            if idx < len(Buffer):
-                Buffer[idx] = 0
-                Home[suit].append[card]
-                Path.append(cur_cards)
-            else:
-                Desk[idx-len(Buffer)].pop()
-                Home[suit].append[card]
-                Path.append(cur_cards)
             return True
-        else:
-            if cur_cards[suit+12] == (card + 1):
-                return True
+    else:
+        if home_cards[suit] == (card-1):
+            return True
     return False
+
+
+def fit_desk(card, desk_cards):
+    """ Try to put card from Desk to Desk """
+    suit = (card-1)//mn
+    suit2 = (suit+2)%4
+
+    for i in desk_cards:
+        if ((i-1)//mn) in (suit, suit2):
+            continue
+        else:
+            pass
+    return True
+
+
+def fit_buffer(card, buffer_cards):
+    pass
 
 
 def initial_deal(random_desk=True):
@@ -82,48 +84,45 @@ def initial_deal(random_desk=True):
             Home[s] = [i for i in range(1, 52)]
 
 
-def move_card_buffer_to_home(card):
-    """ move card from buffer to home """
-    global Score
-    suit = (card - 1) // mn
-    Home[suit].append(card)
-    idx = Buffer.index(card)
-    Buffer[idx] = 0
-    Path.append({'B': idx, 'H': suit})
-    Score += 10
-    game_over()
-
-
-def move_lcard_desk_to_home(col, card):
-    """ move card from buffer to home """
-    global Score
-    suit = (card-1)//mn
-    Home[suit].append(card)
-    Path.append({'D': col, 'H': suit})
-    Score += 10
-    game_over()
-
-
-
-
-
-
 def main():
+    global Score
+    global Path
     # todo: (?) B fit H
     # todo: (y)  B -> H, Path+=1, final, goto(B fit H)
     # todo: (n) (?) D fit H
     # todo:     (y) D -> H, Path+=1, final, goto(B fit H)
     while True:
-        mv_cards = cur_cards()
-        z = len(Buffer) + len(Desk)
-        for card in mv_cards[z]:
+        played_cards = get_played_cards()
+        print(played_cards)
+        if sum(played_cards) == 0:
+            break
+        if len(Path) > 1:
+            break
+        Path.append(played_cards)
+        buffer_idx = len(Desk)
+        home_index = len(Desk) + len(Buffer)
+        for card in played_cards[:home_index]:
+            suit = (card-1)//mn
+            idx = played_cards.index(card)
             if card == 0:
                 continue
-            if fit_home(card, mv_cards):
+            if fit_home(card, played_cards[home_index:]):
+                if idx < buffer_idx:
+                    Desk[idx].pop()
+                else:
+                    Buffer[Buffer.index(card)] = 0
+                Home[suit].append(carld)
+                Score += 10
                 break
             else:
                 # todo:     (n) (?) D fit D
                 # todo:         (y) D -> D, Path+=1, deadlock, goto(D fit H)
+                if idx < buffer_idx:
+                    if fit_desk(card, played_cards[:buffer_idx]):
+                        pass
+                    if fit_buffer(card, played_cards[buffer_idx:home_index]):
+                        pass
+
                 # todo:         (n) (?) D fit B
                 # todo:             (y) D -> B, Path+=1, deadlock, goto(D fit H)
                 # todo:             (n) (?) B fit D
@@ -131,6 +130,9 @@ def main():
                 # todo:                 (n) deadlock
                 pass
 
+    #print("Desk: {}".format(Desk))
+    print("Score: {}".format(Score))
+    print("Path: {}".format(len(Path)))
 
 
 
@@ -139,18 +141,8 @@ def main():
 
 
 
-    for card in Buffer:
-        if card == 0:
-            continue
-        suit = (card - 1)//mn
-        if Home[suit]:
-            if Home[suit][-1] == (card + 1):
-                move_card_buffer_to_home(card)
-                continue
-            else:
-                if card == (suit * mn + 1):
-                    move_card_buffer_to_home(card)
-                    continue
+
+
 
 
 
