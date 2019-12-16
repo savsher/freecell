@@ -87,10 +87,8 @@ def initial_deal(random_desk=True):
 def main():
     global Score
     global Path
-    # todo: (?) B fit H
-    # todo: (y)  B -> H, Path+=1, final, goto(B fit H)
-    # todo: (n) (?) D fit H
-    # todo:     (y) D -> H, Path+=1, final, goto(B fit H)
+    desk_flag = True
+
     while True:
         played_cards = get_played_cards()
         print(played_cards)
@@ -101,6 +99,10 @@ def main():
         Path.append(played_cards)
         buffer_idx = len(Desk)
         home_index = len(Desk) + len(Buffer)
+        # todo: (?) B fit H
+        # todo: (y)  B -> H, Path+=1, final, goto(B fit H)
+        # todo: (n) (?) D fit H
+        # todo:     (y) D -> H, Path+=1, final, goto(B fit H)
         for card in played_cards[:home_index]:
             suit = (card-1)//mn
             idx = played_cards.index(card)
@@ -113,10 +115,14 @@ def main():
                     Buffer[Buffer.index(card)] = 0
                 Home[suit].append(carld)
                 Score += 10
+                desk_flag = False
                 break
-            else:
-                # todo:     (n) (?) D fit D
-                # todo:         (y) D -> D, Path+=1, deadlock, goto(D fit H)
+        while desk_flag:
+            # todo:     (n) (?) D fit D
+            # todo:         (y) D -> D, Path+=1, deadlock, goto(D fit H)
+            for card in played_cards[:home_index]:
+                if card == 0:
+                    continue
                 if idx < buffer_idx:
                     if fit_desk(card, played_cards[:buffer_idx]):
                         pass
