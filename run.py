@@ -120,7 +120,7 @@ def main():
         while desk_flag:
             # todo:     (n) (?) D fit D
             # todo:         (y) D -> D, Path+=1, deadlock, goto(D fit H)
-            for card in played_cards[:home_index]:
+            for card in played_cardsl[:home_index]:
                 if card == 0:
                     continue
                 if idx < buffer_idx:
