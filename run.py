@@ -143,15 +143,27 @@ def main():
 
 
 def get_home_cards():
-    """ get desirable Home cards   """
+    """ get Home cards   """
     x = []
     for i in range(len(Home)):
         try:
             card = Home[i][-1]
-            if card != (i*mn+mn):
+        except IndexError:
+            card = 0
+        finally:
+            x.append(card)
+    return tuple(x)
+
+def get_wish_home_cards():
+    """ get desirable Home cards """
+    x = []
+    for i in range(len(Home)):
+        try:
+            card = Home[i][-1]
+            if card != (i * mn + mn):
                 card += 1
         except IndexError:
-            card = (i*mn+1)
+            card = (i * mn + 1)
         finally:
             x.append(card)
     return tuple(x)
@@ -175,13 +187,13 @@ def get_buffer_cards():
 
 def main2():
     global Score
-    move_flag = True
     dh_flag = bh_flag = bd_flag = dd_flag = db_flag = False
 
-    while move_flag:
+    while True:
         dh_flag = True
         while dh_flag:
-            home_cards = get_home_cards()
+            dh_flag = False
+            home_cards = get_wish_home_cards()
             desk_cards = get_desk_cards()
             for i in range(len(desk_cards)):
                 if desk_cards[i] in home_cards:
@@ -190,14 +202,28 @@ def main2():
                     Home[suit].append(card)
                     Score += 10
                     Path.append(card)
-                    dh_flag = False
+                    dh_flag = True
                     break
-            if dh_flag
+            if not dh_flag:
+                bh_flag = True
 
         while bh_flag:
-            home_cards = get
-            break
+            bh_flag = False
+            home_cards = get_wish_home_cards()
+            for i in range(len(Buffer)):
+                if Buffer[i] in home_cards:
+                    card = Buffer[i]
+                    Buffer[i] = 0
+                    suit = (card-1)//mn
+                    Home[suit].append(card)
+                    Score += 10
+                    Path.append(card)
+                    bh_flag = True
+                    break
+            if not bh_flag:
+                bd_flag = True
         while bd_flag:
+            bd_flag = False
             break
         while dd_flag:
             break
