@@ -87,7 +87,7 @@ def initial_deal(random_desk=True):
 def main():
     global Score
     global Path
-    desk_flag = True
+    goto_desk_flag = True
 
     while True:
         played_cards = get_played_cards()
@@ -113,11 +113,12 @@ def main():
                     Desk[idx].pop()
                 else:
                     Buffer[Buffer.index(card)] = 0
-                Home[suit].append(carld)
+                Home[suit].append(card)
                 Score += 10
-                desk_flag = False
+                goto_desk_flag = False
                 break
-        while desk_flag:
+
+        while goto_desk_flag:
             # todo:     (n) (?) D fit D
             # todo:         (y) D -> D, Path+=1, deadlock, goto(D fit H)
             for card in played_cardsl[:home_index]:
@@ -141,16 +142,71 @@ def main():
     print("Path: {}".format(len(Path)))
 
 
+def get_home_cards():
+    """ get desirable Home cards   """
+    x = []
+    for i in range(len(Home)):
+        try:
+            card = Home[i][-1]
+            if card != (i*mn+mn):
+                card += 1
+        except IndexError:
+            card = (i*mn+1)
+        finally:
+            x.append(card)
+    return tuple(x)
 
 
+def get_desk_cards():
+    """ get current Desk cards """
+    x = []
+    for col in Desk:
+        try:
+            card = col[-1]
+        except IndexError:
+            card = 0
+        finally:
+            x.append(card)
+    return tuple(x)
 
+def get_buffer_cards():
+    """ get current Buffer cards """
+    pass
 
+def main2():
+    global Score
+    move_flag = True
+    dh_flag = bh_flag = bd_flag = dd_flag = db_flag = False
 
+    while move_flag:
+        dh_flag = True
+        while dh_flag:
+            home_cards = get_home_cards()
+            desk_cards = get_desk_cards()
+            for i in range(len(desk_cards)):
+                if desk_cards[i] in home_cards:
+                    card = Desk[i].pop()
+                    suit = (card-1)//mn
+                    Home[suit].append(card)
+                    Score += 10
+                    Path.append(card)
+                    dh_flag = False
+                    break
+            if dh_flag
 
-
-
+        while bh_flag:
+            home_cards = get
+            break
+        while bd_flag:
+            break
+        while dd_flag:
+            break
+        while db_flag:
+            break
+        break
 
 
 
 if __name__ == '__main__':
-    main()
+    #main()
+    main2()
