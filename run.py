@@ -211,6 +211,7 @@ def main2():
             dh_flag = False
             home_cards = get_wish_home_cards()
             desk_cards = get_desk_cards()
+            print(desk_cards)
             for i in range(len(desk_cards)):
                 if desk_cards[i] in home_cards:
                     card = Desk[i].pop()
@@ -260,15 +261,14 @@ def main2():
             wish_cards = get_wish_home_cards()
             wish_idx = []
             tmp = []
-            tmp2 = []
             for col in range(len(Desk)):
                 for i in range(len(Desk[col])):
                     if Desk[col][i] in wish_cards:
                         tmp.append((col, len(Desk[col])-i+1))
-
             tmp = sorted(tmp, key=lambda x: x[1])
             for i in tmp:
-                wish_idx.append(i[0])
+                if i[0] not in wish_idx:
+                    wish_idx.append(i[0])
             tmp = []
             for col in range(len(Desk)):
                 try:
@@ -277,9 +277,7 @@ def main2():
                     tmp.append((col, 0))
             tmp = sorted(tmp, key=lambda x: x[1], reverse=True)
             for i in tmp:
-                if i[0] in wish_idx:
-                    continue
-                else:
+                if i[0] not in wish_idx:
                     wish_idx.append(i[0])
             print(wish_idx)
 
