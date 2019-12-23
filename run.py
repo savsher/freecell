@@ -20,6 +20,8 @@ Buffer = [0, 0, 0, 0]
 Path = []
 NoPath = []
 
+ACE = [i for i in range(1,53) if i%mn == 1]
+KINGS = [i for i in range(1, 53) if i%mn == 13]
 
 def get_played_cards():
     """
@@ -140,6 +142,7 @@ def get_home_cards():
             x.append(card)
     return tuple(x)
 
+
 def get_wish_home_cards():
     """ get desirable Home cards """
     x = []
@@ -167,24 +170,18 @@ def get_desk_cards():
             x.append(card)
     return tuple(x)
 
-def card_suit(card):
-    return (card-1)//mn
-
-def card
 
 def fit_desk_cards(card, desk_cards):
     """ Try to put card from Desk to Desk """
-    suit = (card-1) // mn
-    suit2 = (suit+2) % 4
-    grade = [i for i in range]
-
-    for i in desk_cards:
-        if ((i-1)//mn) in (suit, suit2):
-            if desk
-
-        else:
-            pass
-    return False
+    if card in KINGS:
+        return None
+    suit = (card-1)//mn
+    fit_suit = ((suit+1)%4, (suit+3)%4)
+    fit_cards = [i for i in range(1, 53) if (i % mn == (card+1) % mn) and ((i-1)//mn in fit_suit)]
+    for i in range(len(desk_cards)):
+        if desk_cards[i] in fit_cards:
+            return i
+    return None
 
 
 
@@ -228,11 +225,12 @@ def main2():
                     break
             if not bh_flag:
                 bd_flag = True
-        # todo : BUFFER to DESK
+        # todo : BUFFER to DESK (only not empty cells)
         while bd_flag:
             bd_flag = False
+            desk_cards = get_desk_cards()
             for i in range(len(Buffer)):
-                idx = fit_desk(Buffer[i])
+                idx = fit_desk_cards(Buffer[i], desk_cards )
                 if idx:
                     card = Buffer[i]
                     Buffer[i] = 0
@@ -243,13 +241,12 @@ def main2():
                     break
             if not bd_flag:
                 dd_flag = True
-
+        # todo : DESK to DESK (only not empty cells)
         while dd_flag:
             dd_flag = False
-            break
+        # todo : DESK to BUFFER or DESK empty cells)
         while db_flag:
             db_flag = False
-            break
         print('Score: {}'.format(Score))
 
 
