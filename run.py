@@ -61,21 +61,7 @@ def fit_home(card, home_cards):
     return False
 
 
-def fit_desk(card, desk_cards):
-    """ Try to put card from Desk to Desk """
-    suit = (card-1)//mn
-    suit2 = (suit+2)%4
 
-    for i in desk_cards:
-        if ((i-1)//mn) in (suit, suit2):
-            continue
-        else:
-            pass
-    return True
-
-
-def fit_buffer(card, buffer_cards):
-    pass
 
 
 def initial_deal(random_desk=True):
@@ -181,16 +167,36 @@ def get_desk_cards():
             x.append(card)
     return tuple(x)
 
-def get_buffer_cards():
-    """ get current Buffer cards """
-    pass
+def card_suit(card):
+    return (card-1)//mn
+
+def card
+
+def fit_desk_cards(card, desk_cards):
+    """ Try to put card from Desk to Desk """
+    suit = (card-1) // mn
+    suit2 = (suit+2) % 4
+    grade = [i for i in range]
+
+    for i in desk_cards:
+        if ((i-1)//mn) in (suit, suit2):
+            if desk
+
+        else:
+            pass
+    return False
+
+
 
 def main2():
     global Score
+    start_flag = True
     dh_flag = bh_flag = bd_flag = dd_flag = db_flag = False
 
-    while True:
+    while start_flag:
+        start_flag = False
         dh_flag = True
+        # todo: DESK to HOME
         while dh_flag:
             dh_flag = False
             home_cards = get_wish_home_cards()
@@ -206,7 +212,7 @@ def main2():
                     break
             if not dh_flag:
                 bh_flag = True
-
+        # todo: BUFFER to HOME
         while bh_flag:
             bh_flag = False
             home_cards = get_wish_home_cards()
@@ -222,15 +228,29 @@ def main2():
                     break
             if not bh_flag:
                 bd_flag = True
+        # todo : BUFFER to DESK
         while bd_flag:
             bd_flag = False
-            break
+            for i in range(len(Buffer)):
+                idx = fit_desk(Buffer[i])
+                if idx:
+                    card = Buffer[i]
+                    Buffer[i] = 0
+                    Desk[idx].append(card)
+                    Score -= 1
+                    Path.append(card)
+                    bd_flag = True
+                    break
+            if not bd_flag:
+                dd_flag = True
+
         while dd_flag:
+            dd_flag = False
             break
         while db_flag:
+            db_flag = False
             break
-        break
-
+        print('Score: {}'.format(Score))
 
 
 if __name__ == '__main__':
