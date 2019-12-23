@@ -20,8 +20,8 @@ Buffer = [0, 0, 0, 0]
 Path = []
 NoPath = []
 
-ACE = [i for i in range(1,53) if i%mn == 1]
-KINGS = [i for i in range(1, 53) if i%mn == 13]
+ACE = [i for i in range(1, 53) if i % mn == 1]
+KINGS = [i for i in range(1, 53) if i % mn == 13]
 
 def get_played_cards():
     """
@@ -184,6 +184,19 @@ def fit_desk_cards(card, desk_cards):
     return None
 
 
+def buffer_size():
+    """ calculate Total Buffer size """
+    a = 0
+    for i in Buffer:
+        if i == 0:
+            a+=0
+    b = 0
+    for i in Desk:
+        if len(Desk[i]) == 0:
+            b += 1
+    c = ((a+b)*(a+b+1) - b*(b-1))//2
+    return (a, b, c)
+
 
 def main2():
     global Score
@@ -244,6 +257,43 @@ def main2():
         # todo : DESK to DESK (only not empty cells)
         while dd_flag:
             dd_flag = False
+            wish_cards = get_wish_home_cards()
+            wish_idx = []
+            tmp = []
+            tmp2 = []
+            for col in range(len(Desk)):
+                for i in range(len(Desk[col])):
+                    if Desk[col][i] in wish_cards:
+                        tmp.append((col, len(Desk[col])-i+1))
+
+            tmp = sorted(tmp, key=lambda x: x[1])
+            for i in tmp:
+                wish_idx.append(i[0])
+            tmp = []
+            for col in range(len(Desk)):
+                try:
+                    tmp.append((col, Desk[col][-1]%13))
+                except IndexError:
+                    tmp.append((col, 0))
+            tmp = sorted(tmp, key=lambda x: x[1], reverse=True)
+            for i in tmp:
+                if i[0] in wish_idx:
+                    continue
+                else:
+                    wish_idx.append(i[0])
+            print(wish_idx)
+
+
+
+
+
+
+
+
+
+
+
+
         # todo : DESK to BUFFER or DESK empty cells)
         while db_flag:
             db_flag = False
