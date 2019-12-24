@@ -172,7 +172,7 @@ def get_desk_cards():
 
 
 def fit_desk_cards(card, desk_cards):
-    """ Try to put card from Desk to Desk """
+    """ Try to put card to Desk """
     if card in KINGS:
         return None
     suit = (card-1)//mn
@@ -183,17 +183,31 @@ def fit_desk_cards(card, desk_cards):
             return i
     return None
 
+def fit_together(card, card2):
+    """ Check two cards for compability """
+    if card in KINGS:
+        return False
+    suit = (card-1)//mn
+    fit_suit = ((suit+1)%4, (suit+3)%4)
+    fit_cards = [i for i in range(1, 53) if (i % mn == (card+1) % mn) and ((i-1)//mn in fit_suit)]
+    if card2 in fit_cards:
+        return True
+    return False
+
 
 def buffer_size():
-    """ calculate Total Buffer size """
+    """ Calculate Total Buffer size
+    return: ( free buffer cell, free column in desk, total size)
+    """
     a = 0
     for i in Buffer:
         if i == 0:
-            a+=0
+            a += 0
     b = 0
-    for i in Desk:
-        if len(Desk[i]) == 0:
+    for col in Desk:
+        if len(col) == 0:
             b += 1
+
     c = ((a+b)*(a+b+1) - b*(b-1))//2
     return (a, b, c)
 
@@ -258,6 +272,8 @@ def main2():
         # todo : DESK to DESK (only not empty cells)
         while dd_flag:
             dd_flag = False
+            desk_cards = get_desk_cards()
+            # todo: find priority
             wish_cards = get_wish_home_cards()
             wish_idx = []
             tmp = []
@@ -272,7 +288,7 @@ def main2():
             tmp = []
             for col in range(len(Desk)):
                 try:
-                    tmp.append((col, Desk[col][-1]%13))
+                    tmp.append((col, Desk[col][-1] % 13))
                 except IndexError:
                     tmp.append((col, 0))
             tmp = sorted(tmp, key=lambda x: x[1], reverse=True)
@@ -280,21 +296,51 @@ def main2():
                 if i[0] not in wish_idx:
                     wish_idx.append(i[0])
             print(wish_idx)
-
-
-
-
-
-
-
-
-
-
-
-
-        # todo : DESK to BUFFER or DESK empty cells)
+            # todo: find move
+            for i in wish_idx:
+                try:
+                    a = [Desk[i][-1]]
+                except IndexError:
+                    break
+                for j in range(len(Desk[i])-2, -1, -1):
+                    if fit_together(a[-1], Desk[i][j]):
+                        a.append(Desk[i][j])
+                    else:
+                        break
+                total_size = buffer_size()[2]
+                if (len(a)-1) <= total_size:
+                    idx = fit_desk_cards(a[-1], desk_cards)
+                    if idx:
+                        while a:
+                            Path.append(Desk[i].pop())
+                            Score -= 1
+                            Desk[idx].append(a.pop())
+                            Score -= 1
+                        dh_flag = True
+                        break
+            if not dh_flag:
+                db_flag = True
+        # todo : DESK to BUFFER or DESK empty columns
         while db_flag:
             db_flag = False
+            bsize, csize, tsize = buffer_size()
+            if csize == 0:
+                tmp = []
+                for col in range(len(Desk)):
+                    tmp.append((i, Desk[i][-1]))
+                tmp = sorted(tmp, key=lambda x: x[1]%mn, reverse=True)
+                wish_idx = [i[0] for i in tmp]
+                for col in wish_idx:
+                    pass
+
+
+            else:
+
+                pass
+
+
+
+
         print('Score: {}'.format(Score))
 
 
