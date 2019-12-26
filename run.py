@@ -199,17 +199,25 @@ def buffer_size():
     """ Calculate Total Buffer size
     return: ( free buffer cell, free column in desk, total size)
     """
-    a = 0
+
+    fbc = 0
     for i in Buffer:
         if i == 0:
-            a += 0
-    b = 0
+            fbc += 1
+
+    fdc = 0
     for col in Desk:
         if len(col) == 0:
-            b += 1
+            fdc += 1
 
-    c = ((a+b)*(a+b+1) - b*(b-1))//2
-    return (a, b, c)
+    if fbc => 1:
+        line_size = 2**fdc+(fbc-1)
+    else:
+        line_size = 2**(fdc-1)
+
+    total_size = ((fbc+fdc)*(fbc+fdc+1) - fbc*(fbc-1))//2
+
+    return (fbc, fdc, line_size, total_size)
 
 
 def main2():
@@ -323,22 +331,13 @@ def main2():
         # todo : DESK to BUFFER or DESK empty columns
         while db_flag:
             db_flag = False
-            bsize, csize, tsize = buffer_size()
-            if csize == 0:
-                tmp = []
-                for col in range(len(Desk)):
-                    tmp.append((i, Desk[i][-1]))
-                tmp = sorted(tmp, key=lambda x: x[1]%mn, reverse=True)
-                wish_idx = [i[0] for i in tmp]
-                for col in wish_idx:
-                    pass
+            buf_size, col_size, line_size, total_size,  = buffer_size()
+            if col_size ==0:
 
 
             else:
 
                 pass
-
-
 
 
         print('Score: {}'.format(Score))
