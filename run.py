@@ -195,29 +195,32 @@ def fit_together(card, card2):
     return False
 
 
-def buffer_size():
+def buffer_size(adj_free_cell=0, adj_free_col=0):
     """ Calculate Total Buffer size
     return: ( free buffer cell, free column in desk, total size)
     """
 
-    fbc = 0
+    free_cell = 0
     for i in Buffer:
         if i == 0:
-            fbc += 1
+            free_cell += 1
+    free_cell += adj_free_cell
 
-    fdc = 0
+    free_col = 0
     for col in Desk:
         if len(col) == 0:
-            fdc += 1
+            free_col += 1
+    free_col += adj_free_col
 
-    if fbc => 1:
-        line_size = 2**fdc+(fbc-1)
+
+    if free_cell => 1:
+        line_size = 2**free_col+(free_cell-1)
     else:
-        line_size = 2**(fdc-1)
+        line_size = 2**(free_col-1)
 
-    total_size = ((fbc+fdc)*(fbc+fdc+1) - fbc*(fbc-1))//2
+    total_size = ((free_cell+free_col)*(free_cell+free_col+1) - free_cell*(free_cell-1))//2
 
-    return (fbc, fdc, line_size, total_size)
+    return (free_cell, free_col, line_size, total_size)
 
 
 def main2():
@@ -331,8 +334,28 @@ def main2():
         # todo : DESK to BUFFER or DESK empty columns
         while db_flag:
             db_flag = False
-            buf_size, col_size, line_size, total_size,  = buffer_size()
-            if col_size ==0:
+            buf_size, col_size, line_size, total_size = buffer_size()
+            if col_size == 0:
+                cur_buf = 1
+                tmp = []
+                while cur_buf < total_size:
+                    for i in range(len(Desk)):
+                        if len(Desk[i]) == cur_buf:
+                            _, _, _, new_total_size = buffer_size(adj_free_cell=(-1), adj_free_col=1)
+                            if new_total_size > buffer_size():
+                                # todo : move
+                        card1 = Desk[i][-(cur_buf)]
+                        card2 = Desk[i][-(cur_buf+1)]
+                        if fit_together(card1, card2):
+                            continue
+                        if 
+
+
+
+
+
+                    cur_buf += 1
+
 
 
             else:
@@ -342,7 +365,7 @@ def main2():
 
         print('Score: {}'.format(Score))
 
-
+д
 if __name__ == '__main__':
     #main()
     main2()
