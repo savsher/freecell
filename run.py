@@ -213,7 +213,7 @@ def buffer_size(adj_free_cell=0, adj_free_col=0):
     free_col += adj_free_col
 
 
-    if free_cell => 1:
+    if free_cell >= 1:
         line_size = 2**free_col+(free_cell-1)
     else:
         line_size = 2**(free_col-1)
@@ -337,35 +337,26 @@ def main2():
             buf_size, col_size, line_size, total_size = buffer_size()
             if col_size == 0:
                 cur_buf = 1
-                tmp = []
+                nc_fit_home = []
+                nc_fit_desk = []
+                nc_no = []
                 while cur_buf < total_size:
                     for i in range(len(Desk)):
                         if len(Desk[i]) == cur_buf:
                             _, _, _, new_total_size = buffer_size(adj_free_cell=(-1), adj_free_col=1)
-                            if new_total_size > buffer_size():
-                                # todo : move
-                        card1 = Desk[i][-(cur_buf)]
-                        card2 = Desk[i][-(cur_buf+1)]
-                        if fit_together(card1, card2):
+                            if new_total_size > total_size:
+                                nc_no.append(i)
+                        card = Desk[i][-(cur_buf)]
+                        ncard = Desk[i][-(cur_buf+1)]
+                        if fit_together(card, ncard):
                             continue
-                        if 
-
-
-
-
-
+                        if fit_home(ncard, )
                     cur_buf += 1
 
-
-
             else:
-
                 pass
-
-
         print('Score: {}'.format(Score))
 
-д
 if __name__ == '__main__':
     #main()
     main2()
