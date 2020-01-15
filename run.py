@@ -313,6 +313,7 @@ def main():
             wish_cards = get_wish_home_cards()
             wish_idx = []
             tmp = []
+            # todo: priority for nearest wish card
             for col in range(len(Desk)):
                 for i in range(len(Desk[col])):
                     if Desk[col][i] in wish_cards:
@@ -322,27 +323,31 @@ def main():
                 if i[0] not in wish_idx:
                     wish_idx.append(i[0])
             tmp = []
+            # todo:  priority max cards ( Kings -> 2)
             for col in range(len(Desk)):
                 try:
                     tmp.append((col, Desk[col][-1] % 13))
                 except IndexError:
                     tmp.append((col, 0))
             tmp = sorted(tmp, key=lambda x: x[1], reverse=True)
+            # todo:  complete wish_list
             for i in tmp:
                 if i[0] not in wish_idx:
                     wish_idx.append(i[0])
             # todo: find move
             for i in wish_idx:
+                # save from empty Desk columns
                 try:
                     a = [Desk[i][-1]]
                 except IndexError:
                     break
+                #
                 for j in range(len(Desk[i])-2, -1, -1):
                     if fit_two(a[-1], Desk[i][j]):
                         a.append(Desk[i][j])
                     else:
                         break
-                total_size = buffer_size()[2]
+                _, _, _, total_size = buffer_size()
                 if (len(a)-1) <= total_size:
                     idx = fit_desk_cards(a[-1], desk_cards)
                     if idx:
