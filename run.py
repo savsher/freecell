@@ -16,20 +16,61 @@ Desk = ([44, 43, 14, 47, 26, 52, 13],
         [50, 24, 30, 8, 34, 33],
         [40, 42, 18, 45, 38, 4],
         [35, 41, 9, 20, 6, 27])
+
 Buffer = [0, 0, 0, 0]
+
 Path = []
+
 NoPath = []
 
 ACE = [i for i in range(1, 53) if i % mn == 1]
 KINGS = [i for i in range(1, 53) if i % mn == 13]
 
-def show_desk():
+def show_desk(new=False):
+    """ Show Buffer Desk and Home"""
+    res = "::\n"
+    def modify(x):
+        out = ''
+        if x == 0:
+            out += ' --'
+        elif x in range(1, 10):
+            out += ' 0' + str(x)
+        else:
+            out += ' ' + str(x)
+        return out
+
+    for i in Buffer:
+        res += modify(i)
+
+    for i in range(len(Home)):
+        try:
+            card = Home[i][-1]
+        except IndexError:
+            card = 0
+        res += modify(card)
+    res += '\n _______________________'
+
     row = 0
     for i in range(len(Desk)):
         if len(Desk[i]) > row:
             row = len(Desk[i])
-    for i in range(len(Desk)):
-        for j in range(row)
+    for j in range(row):
+        res = res + '\n'
+        for i in range(len(Desk)):
+            try:
+                card = Desk[i][j]
+            except IndexError:
+                card = 0
+            res += modify(card)
+    res += '\n'
+    if new:
+        option = 'w'
+    else:
+        option = 'a'
+
+    with open('result.log', option) as f:
+        f.write(res)
+    return res
 
 
 def get_played_cards():
@@ -147,7 +188,7 @@ def fit_desk_cards(card, desk_cards):
     if card in KINGS:
         return None
     suit = (card-1)//mn
-    fit_suit = ((suit+1)%4, (suit+3)%4)
+    fit_suit = ((suit+1) % 4, (suit+3) % 4)
     fit_cards = [i for i in range(1, 53) if (i % mn == (card+1) % mn) and ((i-1)//mn in fit_suit)]
     for i in range(len(desk_cards)):
         if desk_cards[i] in fit_cards:
@@ -175,7 +216,6 @@ def fit_together(cards):
         else:
             return False
     return True
-
 
 
 def buffer_size(adj_free_cell=0, adj_free_col=0):
@@ -206,15 +246,12 @@ def buffer_size(adj_free_cell=0, adj_free_col=0):
     return (free_cell, free_col, line_size, total_size)
 
 
-
-
 def main():
     global Score
     start_flag = True
     dh_flag = bh_flag = bd_flag = dd_flag = db_flag = False
-
+    show_desk(new=True)
     while start_flag:
-        #start_flag = False
         dh_flag = True
         Path.append(get_played_cards())
         # todo: DESK to HOME
@@ -222,7 +259,6 @@ def main():
             dh_flag = False
             home_cards = get_wish_home_cards()
             desk_cards = get_desk_cards()
-            print(desk_cards)
             for i in range(len(desk_cards)):
                 if desk_cards[i] in home_cards:
                     card = Desk[i].pop()
@@ -231,6 +267,7 @@ def main():
                     Score += 10
                     Path.append(get_played_cards())
                     dh_flag = True
+                    show_desk()
                     break
             if not dh_flag:
                 bh_flag = True
@@ -247,6 +284,7 @@ def main():
                     Score += 10
                     Path.append(get_played_cards())
                     bh_flag = True
+                    show_desk()
                     break
             if not bh_flag:
                 bd_flag = True
@@ -263,6 +301,7 @@ def main():
                     Score -= 1
                     Path.append(get_played_cards())
                     bd_flag = True
+                    show_desk()
                     break
             if not bd_flag:
                 dd_flag = True
@@ -292,7 +331,6 @@ def main():
             for i in tmp:
                 if i[0] not in wish_idx:
                     wish_idx.append(i[0])
-            print(wish_idx)
             # todo: find move
             for i in wish_idx:
                 try:
@@ -314,6 +352,7 @@ def main():
                             Desk[idx].append(a.pop())
                             Score -= 1
                         dh_flag = True
+                        show_desk()
                         break
             if not dh_flag:
                 db_flag = True
@@ -356,22 +395,25 @@ def main():
                             move_card_to_buffer(Desk[nc_fit_home[0]][-i])
                             Path.append(get_played_cards())
                             Score -= 1
+                        show_desk()
                         break
                     if nc_no:
                         for i in range(1, cur_buf+1):
                             move_card_to_buffer(Desk[nc_no[0]][-i])
                             Path.append(get_played_cards())
                             Score -= 1
+                        show_desk()
                         break
                     if nc_fit_desk:
                         for i in range(1, cur_buf+1):
                             move_card_to_buffer(Desk[nc_fit_desk[0]][-1])
                             Path.append(get_played_cards())
                             Score -= 1
-                        # pass and count
+                        show_desk()
                         break
                     cur_buf += 1
                 if cur_buf >= total_size:
+                    show_desk()
                     print("'Can't move !!!!")
                     sys.exit(1)
             else:
@@ -393,10 +435,15 @@ def main():
                                         Desk[i].pop()
                                     Score -= len(cards)*2
                                     Path.append(get_played_cards())
+                                    show_desk()
                     line_size -= 1
                 db_flag = True
 
-        print('Score: {}'.format(Score))
+    print('Score: {}'.format(Score))
+    with open('path.log', 'w') as f:
+        for i in Path:
+            f.write(str(i)+'\n')
+
 
 if __name__ == '__main__':
     main()
