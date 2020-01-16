@@ -253,6 +253,9 @@ def main():
     show_desk(new=True)
     while start_flag:
         dh_flag = True
+        if Score < -10:
+            print('exit by cycle')
+            sys.exit(-1)
         Path.append(get_played_cards())
         # todo: DESK to HOME
         while dh_flag:
@@ -317,13 +320,13 @@ def main():
             for col in range(len(Desk)):
                 for i in range(len(Desk[col])):
                     if Desk[col][i] in wish_cards:
-                        tmp.append((col, len(Desk[col])-i+1))
+                        tmp.append((col, len(Desk[col])-(i+1)))
             tmp = sorted(tmp, key=lambda x: x[1])
             for i in tmp:
                 if i[0] not in wish_idx:
                     wish_idx.append(i[0])
             tmp = []
-            # todo:  priority max cards ( Kings -> 2)
+            # todo:  priority max cards ( Kings to 2)
             for col in range(len(Desk)):
                 try:
                     tmp.append((col, Desk[col][-1] % 13))
@@ -336,29 +339,35 @@ def main():
                     wish_idx.append(i[0])
             # todo: find move
             for i in wish_idx:
-                # save from empty Desk columns
+                # escape empty Desk columns
                 try:
                     a = [Desk[i][-1]]
                 except IndexError:
                     break
-                #
-                for j in range(len(Desk[i])-2, -1, -1):
-                    if fit_two(a[-1], Desk[i][j]):
-                        a.append(Desk[i][j])
+                move_cards = []
+                for j in range(len(Desk[i])-1, -1, -1):
+                    card = Desk[i][j]
+                    card_next = Desk[i][j-1]
+                    if fit_two(card, card_next):
+                        move_cards.append(card)
+                        continue
                     else:
-                        break
-                _, _, _, total_size = buffer_size()
-                if (len(a)-1) <= total_size:
-                    idx = fit_desk_cards(a[-1], desk_cards)
-                    if idx:
-                        while a:
-                            Path.append(get_played_cards())
-                            Score -= 1
-                            Desk[idx].append(a.pop())
-                            Score -= 1
-                        dh_flag = True
-                        show_desk()
-                        break
+                        _, _, line_size, _, = buffer_size()
+                        if len(move_cards) <= line_size:
+                            idx = fit_desk_cards(card, desk_cards)
+                            if idx:
+                                while move_cards:
+                                    Desk[i].pop()
+                                    Desk[idx].append(move_cards.pop())
+                                    Score -= 2
+                                Path.append(get_played_cards())
+                                dh_flag = True
+                            else:
+                                break
+                        else:
+                            break
+                if dh_flag:
+                    break
             if not dh_flag:
                 db_flag = True
         # todo : DESK to BUFFER or DESK empty columns
