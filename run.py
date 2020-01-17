@@ -3,6 +3,7 @@
 
 import os
 import sys
+from bibla import num_let
 
 mn = 13
 Score = 0
@@ -29,7 +30,8 @@ KINGS = [i for i in range(1, 53) if i % mn == 13]
 def show_desk(new=False):
     """ Show Buffer Desk and Home"""
     res = "::\n"
-    def modify(x):
+
+    def modify_num(x):
         out = ''
         if x == 0:
             out += ' --'
@@ -39,15 +41,22 @@ def show_desk(new=False):
             out += ' ' + str(x)
         return out
 
+    def modify_let(x):
+        out = ''
+        out += ' ' + num_let[x]
+        return out
+
+
+
     for i in Buffer:
-        res += modify(i)
+        res += modify_let(i)
 
     for i in range(len(Home)):
         try:
             card = Home[i][-1]
         except IndexError:
             card = 0
-        res += modify(card)
+        res += modify_let(card)
     res += '\n _______________________'
 
     row = 0
@@ -61,7 +70,7 @@ def show_desk(new=False):
                 card = Desk[i][j]
             except IndexError:
                 card = 0
-            res += modify(card)
+            res += modify_let(card)
     res += '\n'
     if new:
         option = 'w'
@@ -253,7 +262,7 @@ def main():
     show_desk(new=True)
     while start_flag:
         dh_flag = True
-        if Score < -10:
+        if Score < -100:
             print('exit by cycle')
             sys.exit(-1)
         Path.append(get_played_cards())
@@ -348,10 +357,8 @@ def main():
                 for j in range(len(Desk[i])-1, -1, -1):
                     card = Desk[i][j]
                     card_next = Desk[i][j-1]
-                    if fit_two(card, card_next):
-                        move_cards.append(card)
-                        continue
-                    else:
+                    move_cards.append(card)
+                    if not fit_two(card, card_next):
                         _, _, line_size, _, = buffer_size()
                         if len(move_cards) <= line_size:
                             idx = fit_desk_cards(card, desk_cards)
@@ -361,11 +368,9 @@ def main():
                                     Desk[idx].append(move_cards.pop())
                                     Score -= 2
                                 Path.append(get_played_cards())
+                                show_desk()
                                 dh_flag = True
-                            else:
-                                break
-                        else:
-                            break
+                        break
                 if dh_flag:
                     break
             if not dh_flag:
@@ -376,51 +381,39 @@ def main():
             buf_size, col_size, line_size, total_size = buffer_size()
             if col_size == 0:
                 cur_buf = 1
-                nc_fit_home = []
-                nc_fit_desk = []
-                nc_no = []
+                nextcard_fit_home = []
+                nextcard_fit_desk = []
+                nextcard_no = []
                 while cur_buf < total_size:
                     for i in range(len(Desk)):
                         if len(Desk[i]) == cur_buf:
-                            _, _, _, new_total_size = buffer_size(adj_free_cell=(-1), adj_free_col=1)
+                            _, _, _, new_total_size = buffer_size(adj_free_cell=(-cur_buf), adj_free_col=1)
                             if new_total_size > total_size:
-                                nc_no.append(i)
+                                nextcard_no.append(i)
                         cards = Desk[i][-cur_buf:]
-                        if len(cards) == 2:
-                            if fit_two(cards[0], cards[1]):
-                                continue
-                        elif len(cards) == 3:
-                            if fit_two(cards[0], cards[1]) and fit_two(cards[1], cards[2]):
-                                continue
-                        elif len(cards) == 4:
-                            if fit_two(cards[0], cards[1]) and fit_two(cards[1], cards[2])\
-                                    and fit_two(cards[2], cards[3]):
-                                continue
-                        elif len(cards) == 5:
-                            if fit_two(cards[0], cards[1]) and fit_two(cards[1], cards[2])\
-                                    and fit_two(cards[2], cards[3]) and fit_two(cards[3], cards[4]):
-                                continue
+                        if fit_together(cards):
+                            continue
                         if fit_home(cards[0], get_home_cards()):
-                            nc_fit_home.append(i)
+                            nextcard_fit_home.append(i)
                         if fit_desk(cards[0], get_desk_cards(index=i)):
-                            nc_fit_desk.append(i)
-                    if nc_fit_home:
+                            nextcard_fit_desk.append(i)
+                    if nextcard_fit_home:
                         for i in range(1, cur_buf+1):
-                            move_card_to_buffer(Desk[nc_fit_home[0]][-i])
+                            move_card_to_buffer(Desk[nextcard_fit_home[0]][-i])
                             Path.append(get_played_cards())
                             Score -= 1
                         show_desk()
                         break
-                    if nc_no:
+                    if nextcard_no:
                         for i in range(1, cur_buf+1):
-                            move_card_to_buffer(Desk[nc_no[0]][-i])
+                            move_card_to_buffer(Desk[nextcard_no[0]][-i])
                             Path.append(get_played_cards())
                             Score -= 1
                         show_desk()
                         break
-                    if nc_fit_desk:
+                    if nextcard_fit_desk:
                         for i in range(1, cur_buf+1):
-                            move_card_to_buffer(Desk[nc_fit_desk[0]][-1])
+                            move_card_to_buffer(Desk[nextcard_fit_desk[0]][-1])
                             Path.append(get_played_cards())
                             Score -= 1
                         show_desk()
@@ -433,7 +426,7 @@ def main():
             else:
                 idx = None
                 for i in range(len(Desk)):
-                    if len(Desk[i]==0):
+                    if len(Desk[i]) == 0 :
                         idx = i
                         break
                 while line_size > 0:
