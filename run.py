@@ -219,6 +219,8 @@ def fit_two(card, card2):
 
 def fit_together(cards):
     x = len(cards)-1
+    if x == 0:
+        return False
     while x > 0:
         if fit_two(cards[x], cards[x-1]):
             x -= 1
