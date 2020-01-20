@@ -27,6 +27,26 @@ NoPath = []
 ACE = [i for i in range(1, 53) if i % mn == 1]
 KINGS = [i for i in range(1, 53) if i % mn == 13]
 
+
+def reverse_move(a, b):
+    """ Reverse move """
+    diff = []
+    for i in range(len(last)):
+        if a[i] == b[i]:
+            continue
+        else:
+            diff.append(i)
+    #
+    if all(elem in range(8) for elem in diff):
+
+
+
+
+
+
+
+
+
 def show_desk(new=False):
     """ Show Buffer Desk and Home"""
     res = "::\n"
@@ -45,7 +65,6 @@ def show_desk(new=False):
         out = ''
         out += ' ' + num_let[x]
         return out
-
 
 
     for i in Buffer:
@@ -262,12 +281,12 @@ def main():
     start_flag = True
     dh_flag = bh_flag = bd_flag = dd_flag = db_flag = False
     show_desk(new=True)
+    Path.append(get_played_cards())
     while start_flag:
         dh_flag = True
         if Score < -100:
             print('exit by cycle')
             sys.exit(-1)
-        Path.append(get_played_cards())
         # todo: DESK to HOME
         while dh_flag:
             dh_flag = False
@@ -368,7 +387,7 @@ def main():
                                 while move_cards:
                                     Desk[i].pop()
                                     Desk[idx].append(move_cards.pop())
-                                    Score -= 2
+                                    Score -= 1
                                 Path.append(get_played_cards())
                                 show_desk()
                                 dh_flag = True
@@ -414,16 +433,21 @@ def main():
                         show_desk()
                         break
                     if nextcard_fit_desk:
-                        for i in range(1, cur_buf+1):
-                            move_card_to_buffer(Desk[nextcard_fit_desk[0]][-1])
+                        move_cards_num = cur_buf - 1
+                        while move_cards_num > 0:
+                            card = Desk[nextcard_fit_desk[0]].pop()
+                            move_card_to_buffer(card)
                             Path.append(get_played_cards())
                             Score -= 1
+                            move_cards_num -= 1
                         show_desk()
                         break
                     cur_buf += 1
                 if cur_buf >= total_size:
-                    show_desk()
-                    print("'Can't move !!!!")
+                    print(Path)
+                    last_move = Path[-1]
+                    previous_move = Path[-2]
+
                     sys.exit(1)
             else:
                 idx = None
