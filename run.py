@@ -28,23 +28,60 @@ ACE = [i for i in range(1, 53) if i % mn == 1]
 KINGS = [i for i in range(1, 53) if i % mn == 13]
 
 
-def reverse_move(a, b):
+def reverse_move(ex, last):
     """ Reverse move """
+    global Score
+    global Home
     diff = []
-    for i in range(len(last)):
-        if a[i] == b[i]:
+    for i in range(len(ex)):
+        if ex[i] == last[i]:
             continue
         else:
             diff.append(i)
-    #
-    if all(elem in range(8) for elem in diff):
-
-
-
-
-
-
-
+    if diff[0] in range(8):
+        # Desk to Desk
+        if diff[1] in range(8):
+            if ex[diff[1]] == last[diff[0]]:
+                # move from diff[1] to diff[0]
+                a, b = diff
+            else:
+                # move from diff[0] to diff[1]
+                b, a = diff
+            idx = Desk[a].index(ex[a])
+            move = Desk[a][idx+1:]
+            move.reverse()
+            Score += 2*len(move) - 1
+            while move:
+                Desk[a].pop()
+                Desk[b].append(move.pop())
+        # Desk to Buffer or Buffer to Desk
+        elif diff[1] in range(8,12):
+            # Buffer to Desk
+            if last[diff[1]] == 0:
+                a = diff[0]
+                b = diff[1]-8
+                Buffer[b] = Desk[a].pop()
+            # Desk to Buffer
+            else:
+                a = diff[0]
+                for i in range(1, len(diff)):
+                    b = diff[i]-8
+                    Desk[a].append(Buffer[b])
+                    Buffer[b] = 0
+                    Score -= 1
+        # Desk to Home
+        elif diff[1] in range(12,16):
+            a = diff[0]
+            b = diff[1]-12
+            Desk[a].append(Home[b].pop())
+            Score -= 10
+    # Buffer to Home
+    else:
+        a = diff[0] - 8
+        b = diff[1] - 12
+        Buffer[a] = Home[b].pop()
+        Score -= 10
+    NoPath.append(Path.pop())
 
 
 def show_desk(new=False):
@@ -278,6 +315,7 @@ def buffer_size(adj_free_cell=0, adj_free_col=0):
 
 def main():
     global Score
+    steps = 0
     start_flag = True
     dh_flag = bh_flag = bd_flag = dd_flag = db_flag = False
     show_desk(new=True)
@@ -286,7 +324,14 @@ def main():
         dh_flag = True
         if Score < -100:
             print('exit by cycle')
+            sysl.exit(-1)
+        steps += 1
+        if steps > 100:
+            with open('path.log', 'w') as f:
+                for i in Path:
+                    f.write(str(i) + '\n')
             sys.exit(-1)
+
         # todo: DESK to HOME
         while dh_flag:
             dh_flag = False
@@ -299,9 +344,12 @@ def main():
                     Home[suit].append(card)
                     Score += 10
                     Path.append(get_played_cards())
-                    dh_flag = True
-                    show_desk()
-                    break
+                    if Path[-1] in NoPath:
+                        reverse_move(Path[-2], Path[-1])
+                    else:
+                        dh_flag = True
+                        show_desk()
+                        break
             if not dh_flag:
                 bh_flag = True
         # todo: BUFFER to HOME
@@ -316,9 +364,12 @@ def main():
                     Home[suit].append(card)
                     Score += 10
                     Path.append(get_played_cards())
-                    bh_flag = True
-                    show_desk()
-                    break
+                    if Path[-1] in NoPath:
+                        reverse_move(Path[-2], Path[-1])
+                    else:
+                        bh_flag = True
+                        show_desk()
+                        break
             if not bh_flag:
                 bd_flag = True
         # todo : BUFFER to DESK (only not empty cells)
@@ -333,9 +384,12 @@ def main():
                     Desk[idx].append(card)
                     Score -= 1
                     Path.append(get_played_cards())
-                    bd_flag = True
-                    show_desk()
-                    break
+                    if Path[-1] in NoPath:
+                        reverse_move(Path[-2], Path[-1])
+                    else:
+                        bd_flag = True
+                        show_desk()
+                        break
             if not bd_flag:
                 dd_flag = True
         # todo : DESK to DESK (only not empty cells)
@@ -387,10 +441,13 @@ def main():
                                 while move_cards:
                                     Desk[i].pop()
                                     Desk[idx].append(move_cards.pop())
-                                    Score -= 1
+                                    Score -= 2*len(move_cards)-1
                                 Path.append(get_played_cards())
-                                show_desk()
-                                dh_flag = True
+                                if Path[-1] in NoPath:
+                                    reverse_move(Path[-2], Path[-1])
+                                else:
+                                    show_desk()
+                                    dh_flag = True
                         break
                 if dh_flag:
                     break
@@ -405,7 +462,7 @@ def main():
                 nextcard_fit_home = []
                 nextcard_fit_desk = []
                 nextcard_no = []
-                while cur_buf < total_size:
+                while cur_buf <= total_size:
                     for i in range(len(Desk)):
                         if len(Desk[i]) == cur_buf:
                             _, _, _, new_total_size = buffer_size(adj_free_cell=(-cur_buf), adj_free_col=1)
@@ -423,6 +480,8 @@ def main():
                             move_card_to_buffer(Desk[nextcard_fit_home[0]][-i])
                             Path.append(get_played_cards())
                             Score -= 1
+                            if Path[-1] in NoPath:
+                                reverse_move(Path[-2], Path[-1])
                         show_desk()
                         break
                     if nextcard_no:
@@ -430,6 +489,8 @@ def main():
                             move_card_to_buffer(Desk[nextcard_no[0]][-i])
                             Path.append(get_played_cards())
                             Score -= 1
+                            if Path[-1] in NoPath:
+                                reverse_move(Path[-2], Path[-1])
                         show_desk()
                         break
                     if nextcard_fit_desk:
@@ -440,19 +501,17 @@ def main():
                             Path.append(get_played_cards())
                             Score -= 1
                             move_cards_num -= 1
+                            if Path[-1] in NoPath:
+                                reverse_move(Path[-2], Path[-1])
                         show_desk()
                         break
                     cur_buf += 1
-                if cur_buf >= total_size:
-                    print(Path)
-                    last_move = Path[-1]
-                    previous_move = Path[-2]
-
-                    sys.exit(1)
+                if cur_buf > total_size:
+                    reverse_move(Path[-2], Path[-1])
             else:
                 idx = None
                 for i in range(len(Desk)):
-                    if len(Desk[i]) == 0 :
+                    if len(Desk[i]) == 0:
                         idx = i
                         break
                 while line_size > 0:
@@ -466,9 +525,12 @@ def main():
                                     for card in cards:
                                         Desk[idx].append(card)
                                         Desk[i].pop()
-                                    Score -= len(cards)*2
+                                    Score -= len(cards)*2 - 1
                                     Path.append(get_played_cards())
-                                    show_desk()
+                                    if Path[-1] in NoPath:
+                                        reverse_move(Path[-2], Path[-1])
+                                    else:
+                                        show_desk()
                     line_size -= 1
                 db_flag = True
 
