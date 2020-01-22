@@ -4,6 +4,7 @@
 import os
 import sys
 from bibla import num_let
+from collections import OrderedDict
 
 mn = 13
 Score = 0
@@ -324,7 +325,7 @@ def main():
         dh_flag = True
         if Score < -100:
             print('exit by cycle')
-            sysl.exit(-1)
+            sys.exit(-1)
         steps += 1
         if steps > 100:
             with open('path.log', 'w') as f:
@@ -459,51 +460,41 @@ def main():
             buf_size, col_size, line_size, total_size = buffer_size()
             if col_size == 0:
                 cur_buf = 1
-                nextcard_fit_home = []
-                nextcard_fit_desk = []
-                nextcard_no = []
+                find_next_move = OrderedDict()
+                find_next_move['nx_card_go_home'] = []
+                find_next_move['nx_card_go_desk'] = []
+                find_next_move['nx_card_no'] = []
                 while cur_buf <= total_size:
                     for i in range(len(Desk)):
                         if len(Desk[i]) == cur_buf:
                             _, _, _, new_total_size = buffer_size(adj_free_cell=(-cur_buf), adj_free_col=1)
                             if new_total_size > total_size:
-                                nextcard_no.append(i)
+                                find_next_move['nx_card_no'].append(i)
                         cards = Desk[i][-cur_buf:]
                         if fit_together(cards):
                             continue
                         if fit_home(cards[0], get_home_cards()):
-                            nextcard_fit_home.append(i)
+                            find_next_move['nx_card_go_home'].append(i)
                         if fit_desk(cards[0], get_desk_cards(index=i)):
-                            nextcard_fit_desk.append(i)
-                    if nextcard_fit_home:
-                        for i in range(1, cur_buf+1):
-                            move_card_to_buffer(Desk[nextcard_fit_home[0]][-i])
-                            Path.append(get_played_cards())
-                            Score -= 1
-                            if Path[-1] in NoPath:
-                                reverse_move(Path[-2], Path[-1])
-                        show_desk()
-                        break
-                    if nextcard_no:
-                        for i in range(1, cur_buf+1):
-                            move_card_to_buffer(Desk[nextcard_no[0]][-i])
-                            Path.append(get_played_cards())
-                            Score -= 1
-                            if Path[-1] in NoPath:
-                                reverse_move(Path[-2], Path[-1])
-                        show_desk()
-                        break
-                    if nextcard_fit_desk:
-                        move_cards_num = cur_buf - 1
-                        while move_cards_num > 0:
-                            card = Desk[nextcard_fit_desk[0]].pop()
-                            move_card_to_buffer(card)
-                            Path.append(get_played_cards())
-                            Score -= 1
-                            move_cards_num -= 1
-                            if Path[-1] in NoPath:
-                                reverse_move(Path[-2], Path[-1])
-                        show_desk()
+                            find_next_move['nx_card_go_desk'].append(i)
+                        for key in find_next_move:
+                            if find_next_move[key]:
+                                sack = cur_buf-1
+                                while sack:
+                                    card = Desk[find_next_move[key][0]].pop()
+                                    move_card_to_buffer(card)
+                                    Path.append(get_played_cards())
+                                    Score -= 1
+                                    sack -= 1
+                                    if Path[-1] in NoPath:
+                                        reverse_move(Path[-2], Path[-1])
+                                    else:
+                                        dh_flag = True
+                                show_desk()
+                                break
+                        if dh_flag:
+                            break
+                    if dh_flag:
                         break
                     cur_buf += 1
                 if cur_buf > total_size:
