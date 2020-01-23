@@ -245,7 +245,7 @@ def get_desk_cards(index=None):
         finally:
             x.append(card)
     if index is not None:
-        x.insert(index, 0)
+        x[index] = 0
     return tuple(x)
 
 
